@@ -1,1 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MindMeter — Depression Risk Screen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1923;
+      --surface: #15212d;
+      --surface-2: #1c2b39;
+      --line: rgba(255, 255, 255, 0.08);
+      --ink: #e8f0f5;
+      --ink-soft: #94a4b3;
+      --teal: #3FA796;
+      --teal-soft: rgba(63, 167, 150, 0.18);
+      --coral: #E55934;
+      --amber: #F7B267;
+      --crimson: #A4243B;
+      --mint: #9BD0C7;
+      --shadow: 0 22px 48px rgba(0, 0, 0, 0.45);
+      --radius: 18px;
+    }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+      background: radial-gradient(circle at 20% -10%, rgba(63, 167, 150, 0.16), transparent 55%),
+                  radial-gradient(circle at 110% 0%, rgba(229, 89, 52, 0.12), transparent 50%),
+                  var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 32px 18px 64px;
+      line-height: 1.55;
+    }
+
+    .shell {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: grid;
+      gap: 24px;
+    }
+
+    /* --- header --------------------------------------------------------- */
+    header.title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--teal), var(--mint));
+      display: grid;
+      place-items: center;
+      box-shadow: 0 12px 26px rgba(63, 167, 150, 0.3);
+    }
+    .brand .logo span {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 700;
+      color: #0f1923;
+      font-size: 24px;
+    }
+    .brand h1 {
+      font-family: "Fraunces", Georgia, serif;
+      font-size: clamp(26px, 4vw, 38px);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .brand p {
+      color: var(--ink-soft);
+      font-size: 14px;
+      margin-top: 2px;
+    }
+    .credit {
+      color: var(--ink-soft);
+      font-size: 13px;
+      text-align: right;
+    }
+    .credit strong { color: var(--ink); }
+
+    /* --- step trail ----------------------------------------------------- */
+    nav.trail {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .step-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--ink-soft);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all .25s ease;
+    }
+    .step-pill .num {
+      width: 22px; height: 22px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--ink);
+      display: grid; place-items: center;
+      font-size: 12px; font-weight: 700;
+    }
+    .step-pill.active {
+      background: var(--teal-soft);
+      border-color: var(--teal);
+      color: var(--ink);
+    }
+    .step-pill.active .num {
+      background: var(--teal);
+      color: #0f1923;
+    }
+    .step-pill.done .num {
+      background: var(--mint);
+      color: #0f1923;
+    }
+    .step-pill.done {
+      color: var(--mint);
+      border-color: rgba(155, 208, 199, 0.5);
+    }
+
+    /* --- card ----------------------------------------------------------- */
+    section.card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-body { padding: 28px clamp(20px, 4vw, 36px); }
+    .step h2 {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 700;
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+    .step .lead {
+      color: var(--ink-soft);
+      margin-bottom: 22px;
+      font-size: 14px;
+    }
+    .step:not(.active) { display: none; }
+
+    /* --- grid + inputs -------------------------------------------------- */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+    .field label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink-soft);
+      font-weight: 600;
+    }
+    .field input,
+    .field select {
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color .2s ease, background .2s ease;
+    }
+    .field input:focus,
+    .field select:focus {
+      outline: none;
+      border-color: var(--teal);
+      background: rgba(63, 167, 150, 0.08);
+    }
+    /* Native <option> elements don't inherit the parent <select>'s background
+       on most platforms — the OS dropdown panel uses its own surface. Set
+       both colour and background-color explicitly so the open list stays
+       readable on dark themes. */
+    .field select option {
+      background-color: #1c2b39;
+      color: #e8f0f5;
+      padding: 6px 10px;
+    }
+    .field select option:checked {
+      background: linear-gradient(0deg, #3FA796 0%, #3FA796 100%);
+      color: #0f1923;
+      font-weight: 600;
+    }
+
+    /* --- footer buttons ------------------------------------------------- */
+    .step-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 26px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 11px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: transform .15s ease, background .15s ease, opacity .15s ease;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: var(--teal);
+      color: #0f1923;
+    }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--line);
+      color: var(--ink);
+    }
+    .btn-ghost:hover { background: var(--surface-2); }
+    .btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+    /* --- result --------------------------------------------------------- */
+    .result-wrap {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 28px;
+      align-items: stretch;
+    }
+    @media (max-width: 820px) { .result-wrap { grid-template-columns: 1fr; } }
+
+    .gauge-box {
+      background: var(--surface-2);
+      border-radius: 14px;
+      padding: 22px;
+      display: grid;
+      place-items: center;
+      gap: 12px;
+    }
+    .gauge {
+      width: 240px; height: 130px;
+      position: relative;
+    }
+    .gauge svg { width: 100%; height: 100%; }
+    .gauge-label {
+      text-align: center;
+    }
+    .gauge-label .pct {
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 42px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .gauge-label .caption {
+      color: var(--ink-soft);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .strip {
+      display: grid;
+      grid-template-rows: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .band {
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: all .25s ease;
+      background: var(--surface-2);
+    }
+    .band .name {
+      font-weight: 600;
+      font-size: 14px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .band .swatch {
+      width: 14px; height: 14px; border-radius: 4px;
+    }
+    .band .range {
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+    .band.active {
+      transform: translateX(6px);
+      border-color: rgba(255, 255, 255, 0.25);
+      background: linear-gradient(90deg, rgba(255,255,255,0.05), transparent);
+      box-shadow: 0 18px 32px rgba(0, 0, 0, 0.35);
+    }
+    .band.active .name { color: var(--ink); }
+
+    .breakdown {
+      margin-top: 18px;
+      background: var(--surface-2);
+      border-radius: 14px;
+      padding: 20px 22px;
+    }
+    .breakdown h3 {
+      font-family: "Fraunces", serif;
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+    .breakdown ul {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px 24px;
+      font-size: 13px;
+    }
+    .breakdown li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px dashed var(--line);
+      color: var(--ink-soft);
+    }
+    .breakdown li strong { color: var(--ink); font-weight: 500; }
+
+    .disclaimer {
+      margin-top: 18px;
+      color: var(--ink-soft);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .banner {
+      background: rgba(229, 89, 52, 0.18);
+      border: 1px solid rgba(229, 89, 52, 0.5);
+      color: #ffd6c8;
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      font-size: 14px;
+      display: none;
+    }
+    .banner.show { display: block; }
+
+    /* --- meta strip ----------------------------------------------------- */
+    .meta-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+      font-size: 12px;
+    }
+    .meta-strip .meta-cell {
+      background: var(--surface-2);
+      border-radius: 10px;
+      padding: 12px 14px;
+      border-left: 3px solid var(--teal);
+    }
+    .meta-strip .meta-cell .k {
+      color: var(--ink-soft);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+    .meta-strip .meta-cell .v { font-weight: 600; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="title">
+      <div class="brand">
+        <div class="logo"><span>m</span></div>
+        <div>
+          <h1>MindMeter</h1>
+          <p>A calibrated depression-risk screener with 4-band tiering.</p>
+        </div>
+      </div>
+      <div class="credit">
+        <div><strong>Habiba Farag Shehata</strong></div>
+        <div>2210018882 · ML coursework, May 2026</div>
+      </div>
+    </header>
+
+    <nav class="trail" id="trail">
+      <span class="step-pill" data-pill="0"><span class="num">1</span>Profile</span>
+      <span class="step-pill" data-pill="1"><span class="num">2</span>Pressure &amp; Lifestyle</span>
+      <span class="step-pill" data-pill="2"><span class="num">3</span>Background</span>
+      <span class="step-pill" data-pill="3"><span class="num">4</span>Result</span>
+    </nav>
+
+    <div class="banner" id="banner"></div>
+
+    <section class="card">
+      <div class="card-body">
+        <form id="wizard" autocomplete="off">
+
+          <!-- step 1: profile ------------------------------------------------ -->
+          <div class="step active" data-step="0">
+            <h2>Tell us a bit about yourself.</h2>
+            <p class="lead">Demographics and the basic role context. None of these answers are stored anywhere.</p>
+            <div class="grid">
+              <div class="field">
+                <label for="Age">Age</label>
+                <input type="number" id="Age" name="Age" min="14" max="100" step="1" value="{{ defaults.Age | round(0) | int }}" required />
+              </div>
+              <div class="field">
+                <label for="Gender">Gender</label>
+                <select id="Gender" name="Gender">
+                  {% for v in options.Gender %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+                </select>
+              </div>
+              <div class="field">
+                <label for="Role">Role</label>
+                <select id="Role" name="Role">
+                  {% for v in options.Role %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+                </select>
+              </div>
+              <div class="field">
+                <label for="Profession">Profession</label>
+                <select id="Profession" name="Profession">
+                  {% for v in options.Profession %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+                </select>
+              </div>
+              <div class="field">
+                <label for="Degree">Degree</label>
+                <select id="Degree" name="Degree">
+                  {% for v in options.Degree %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+                </select>
+              </div>
+              <div class="field">
+                <label for="City">City</label>
+                <select id="City" name="City">
+                  {% for v in options.City %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- step 2: pressure + lifestyle ----------------------------------- -->
+          <div class="step" data-step="1">
+            <h2>How is your day shaping up?</h2>
+            <p class="lead">Self-rated pressures, satisfaction, and lifestyle. Use a 1-5 scale where 5 means high.</p>
+            <div class="grid">
+              <div class="field">
+                <label for="AcademicPressure">Academic pressure (1–5)</label>
+                <input type="number" id="AcademicPressure" name="AcademicPressure" min="0" max="5" step="0.5" value="{{ defaults.AcademicPressure }}" />
+              </div>
+              <div class="field">
+                <label for="WorkPressure">Work pressure (1–5)</label>
+                <input type="number" id="WorkPressure" name="WorkPressure" min="0" max="5" step="0.5" value="{{ defaults.WorkPressure }}" />
+              </div>
+              <div class="field">
+                <label for="StudySatisfaction">Study satisfaction (1–5)</label>
+                <input type="number" id="StudySatisfaction" name="StudySatisfaction" min="0" max="5" step="0.5" value="{{ defaults.StudySatisfaction }}" />
+              </div>
+              <div class="field">
+                <label for="JobSatisfaction">Job satisfaction (1–5)</label>
+                <input type="number" id="JobSatisfaction" name="JobSatisfaction" min="0" max="5" step="0.5" value="{{ defaults.JobSatisfaction }}" />
+              </div>
+              <div class="field">
+                <label for="WorkStudyHours">Daily work / study hours</label>
+                <input type="number" id="WorkStudyHours" name="WorkStudyHours" min="0" max="20" step="0.5" value="{{ defaults.WorkStudyHours }}" />
+              </div>
+              <div class="field">
+                <label for="CGPA">Current CGPA (0–10, leave blank if N/A)</label>
+                <input type="number" id="CGPA" name="CGPA" min="0" max="10" step="0.01" value="{{ defaults.CGPA }}" />
+              </div>
+              <div class="field">
+                <label for="SleepDuration">Sleep duration</label>
+                <select id="SleepDuration" name="SleepDuration">
+                  {% for v in options.SleepDuration %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+                </select>
+              </div>
+              <div class="field">
+                <label for="DietaryHabits">Dietary habits</label>
+                <select id="DietaryHabits" name="DietaryHabits">
+                  {% for v in options.DietaryHabits %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- step 3: background ------------------------------------------- -->
+          <div class="step" data-step="2">
+            <h2>A little background.</h2>
+            <p class="lead">Two history items and one financial-stress score round out the picture.</p>
+            <div class="grid">
+              <div class="field">
+                <label for="FinancialStress">Financial stress (1–5)</label>
+                <input type="number" id="FinancialStress" name="FinancialStress" min="0" max="5" step="0.5" value="{{ defaults.FinancialStress }}" />
+              </div>
+              <div class="field">
+                <label for="SuicidalThoughtsEver">Have you ever had suicidal thoughts?</label>
+                <select id="SuicidalThoughtsEver" name="SuicidalThoughtsEver">
+                  {% for v in options.SuicidalThoughtsEver %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+                </select>
+              </div>
+              <div class="field">
+                <label for="FamilyHistory">Family history of mental illness?</label>
+                <select id="FamilyHistory" name="FamilyHistory">
+                  {% for v in options.FamilyHistory %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- step 4: result ----------------------------------------------- -->
+          <div class="step" data-step="3">
+            <h2>Your calibrated risk reading.</h2>
+            <p class="lead">The probability is calibrated against a held-out set, so the percentage you see is meant to be read as a real likelihood, not just a relative score.</p>
+            <div class="result-wrap">
+              <div class="gauge-box">
+                <div class="gauge">
+                  <svg viewBox="0 0 200 110">
+                    <path d="M 10 100 A 90 90 0 0 1 190 100"
+                          fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="14" stroke-linecap="round" />
+                    <path id="gaugeArc" d="M 10 100 A 90 90 0 0 1 190 100"
+                          fill="none" stroke="url(#gaugeGrad)" stroke-width="14" stroke-linecap="round"
+                          stroke-dasharray="0, 999" />
+                    <defs>
+                      <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#3FA796" />
+                        <stop offset="40%" stop-color="#F7B267" />
+                        <stop offset="80%" stop-color="#E55934" />
+                        <stop offset="100%" stop-color="#A4243B" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+                <div class="gauge-label">
+                  <div class="pct" id="pctText">--</div>
+                  <div class="caption" id="captionText">awaiting reading</div>
+                </div>
+              </div>
+              <div class="strip" id="strip">
+                <!-- bands populated by JS -->
+              </div>
+            </div>
+
+            <div class="breakdown">
+              <h3>Inputs the model saw</h3>
+              <ul id="breakdown"></ul>
+            </div>
+          </div>
+
+          <!-- footer / nav buttons -->
+          <div class="step-footer">
+            <button type="button" class="btn btn-ghost" id="btnBack" disabled>← Back</button>
+            <div style="display: flex; gap: 10px;">
+              <button type="button" class="btn btn-ghost" id="btnReset">Reset</button>
+              <button type="button" class="btn btn-primary" id="btnNext">Next →</button>
+            </div>
+          </div>
+        </form>
+
+        <!-- bottom meta strip -->
+        <div class="meta-strip">
+          <div class="meta-cell">
+            <div class="k">model</div>
+            <div class="v">{{ metadata.winner }} · calibrated</div>
+          </div>
+          <div class="meta-cell">
+            <div class="k">test ROC-AUC</div>
+            <div class="v">{{ '%.3f' % metadata.final_metrics.roc_auc }}</div>
+          </div>
+          <div class="meta-cell">
+            <div class="k">brier score</div>
+            <div class="v">{{ '%.3f' % metadata.final_metrics.brier }}</div>
+          </div>
+          <div class="meta-cell">
+            <div class="k">tiers</div>
+            <div class="v">{{ tier_labels | join(' · ') }}</div>
+          </div>
+        </div>
+
+        <p class="disclaimer">
+          <strong>MindMeter is a coursework artefact.</strong> It is not a diagnostic tool, was not validated for clinical use, and cannot replace a conversation with a qualified mental-health professional. If you are struggling, please contact a local crisis line.
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const tierLabels = {{ tier_labels | tojson }};
+    const tierEdges  = {{ tier_edges  | tojson }};
+    const bandColors = ["#3FA796", "#F7B267", "#E55934", "#A4243B"];
+
+    const steps   = document.querySelectorAll(".step");
+    const pills   = document.querySelectorAll(".step-pill");
+    const btnNext = document.getElementById("btnNext");
+    const btnBack = document.getElementById("btnBack");
+    const btnReset= document.getElementById("btnReset");
+    const banner  = document.getElementById("banner");
+    let current = 0;
+    const TOTAL = steps.length;
+
+    function showStep(i) {
+      current = i;
+      steps.forEach((s, idx) => s.classList.toggle("active", idx === i));
+      pills.forEach((p, idx) => {
+        p.classList.toggle("active", idx === i);
+        p.classList.toggle("done", idx < i);
+      });
+      btnBack.disabled = (i === 0);
+      btnNext.textContent = (i === TOTAL - 2) ? "Get my reading →"
+                            : (i === TOTAL - 1) ? "Done"
+                            : "Next →";
+      btnNext.disabled = (i === TOTAL - 1);
+    }
+
+    btnBack.addEventListener("click", () => {
+      if (current > 0) showStep(current - 1);
+    });
+
+    btnReset.addEventListener("click", () => {
+      document.getElementById("wizard").reset();
+      banner.classList.remove("show");
+      showStep(0);
+      document.getElementById("pctText").textContent = "--";
+      document.getElementById("captionText").textContent = "awaiting reading";
+      document.querySelector("#gaugeArc").setAttribute("stroke-dasharray", "0, 999");
+      paintStrip(-1);
+      document.getElementById("breakdown").innerHTML = "";
+    });
+
+    btnNext.addEventListener("click", async () => {
+      // before stepping into the result, score the form
+      if (current === TOTAL - 2) {
+        await runScoring();
+      }
+      if (current < TOTAL - 1) showStep(current + 1);
+    });
+
+    function paintStrip(activeIdx) {
+      const strip = document.getElementById("strip");
+      strip.innerHTML = "";
+      tierLabels.forEach((label, i) => {
+        const lo = (tierEdges[i] * 100).toFixed(0);
+        const hi = (tierEdges[i + 1] * 100).toFixed(0);
+        const div = document.createElement("div");
+        div.className = "band" + (i === activeIdx ? " active" : "");
+        div.innerHTML = `
+          <div class="name"><span class="swatch" style="background:${bandColors[i]}"></span>${label} risk</div>
+          <div class="range">${lo}% – ${hi}%</div>
+        `;
+        strip.appendChild(div);
+      });
+    }
+
+    async function runScoring() {
+      banner.classList.remove("show");
+      const form = document.getElementById("wizard");
+      const data = {};
+      new FormData(form).forEach((v, k) => { data[k] = v; });
+
+      try {
+        const resp = await fetch("/score", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        const result = await resp.json();
+        if (!result.ok) throw new Error(result.error || "scoring failed");
+
+        // animate the gauge
+        const arc = document.querySelector("#gaugeArc");
+        const totalLen = 282;  // approx length of the half-circle arc
+        const target = totalLen * Math.min(Math.max(result.probability, 0), 1);
+        let frame = 0;
+        const start = performance.now();
+        function tick(t) {
+          const dt = Math.min((t - start) / 900, 1);
+          const eased = 1 - Math.pow(1 - dt, 3);
+          arc.setAttribute("stroke-dasharray", `${eased * target}, ${totalLen}`);
+          if (dt < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+
+        document.getElementById("pctText").textContent =
+          `${result.probability_pct.toFixed(1)}%`;
+        document.getElementById("captionText").textContent =
+          `tier: ${result.tier}`;
+
+        paintStrip(result.band_index);
+
+        const ul = document.getElementById("breakdown");
+        ul.innerHTML = "";
+        result.breakdown.forEach(item => {
+          const li = document.createElement("li");
+          let val = item.value;
+          if (typeof val === "number") val = val.toFixed(2);
+          li.innerHTML = `<span>${item.feature}</span><strong>${val}</strong>`;
+          ul.appendChild(li);
+        });
+      } catch (err) {
+        banner.textContent = "Could not score: " + err.message;
+        banner.classList.add("show");
+      }
+    }
+
+    // init
+    paintStrip(-1);
+    showStep(0);
+  </script>
+</body>
+</html>
