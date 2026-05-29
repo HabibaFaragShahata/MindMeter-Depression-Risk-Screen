@@ -1,5 +1,4 @@
-# MindMeter Depression Risk Screen (submission)
-
+# MindMeter Depression Risk Screen
 **Habiba Farag Shehata - 2210018882 **
 
 This is the runnable submission package for MindMeter. It contains the cleaned modelling dataset, an executed end-to-end notebook, ten figures, the four serialised artefacts, and a Flask + JavaScript wizard UI. Everything needed to grade the project end-to-end is in this folder — no external downloads, no missing build steps.
