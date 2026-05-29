@@ -1,4 +1,4 @@
-# MindMeter — Depression Risk Screen (submission)
+# MindMeter Depression Risk Screen (submission)
 
 **Habiba Farag Shehata - 2210018882 **
 
