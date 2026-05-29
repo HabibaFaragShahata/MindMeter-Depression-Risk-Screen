@@ -135,5 +135,3 @@ jupyter nbconvert --to notebook --execute notebook.ipynb --output notebook.ipynb
 - Calibration was computed on a held-out slice, not via cross-validation.
 
 ---
-
-> **Coursework artefact, not a clinical tool.** If you are struggling, please reach out to a local crisis line — for example, dialing 911 or 988 in the US, or your country's equivalent.
